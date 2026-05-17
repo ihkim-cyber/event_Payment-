@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>판매내역 - 바비톡 병원관리자</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+<style>
+/* ── Design Tokens (s.color.*) ── */
+:root {
+  --content-default:     #0C092A;
+  --content-alter:       #494760;
+  --content-subtle:      #70798F;
+  --content-disabled:    #DADADF;
+  --content-placeholder: #A4A3AF;
+  --content-inverse:     #FFFFFF;
+  --content-primary:     #5033FF;
+  --content-error:       #E61A2B;
+  --content-warning:     #FF8000;
+  --content-success:     #5FC982;
+  --container-neutral-soft:    #F7F7F9;
+  --container-neutral-bright:  #FCFCFC;
+  --container-neutral-inverse: #FFFFFF;
+  --container-primary-default: #674DFF;
+  --container-primary-subtle:  #F5F3FF;
+  --container-success-subtle:  #ECF9F0;
+  --container-error-subtle:    #FEECED;
+  --container-warning-subtle:  #FFF7EB;
+  --outline-neutral-subtle:  #ECECEF;
+  --outline-primary-default: #7B64FF;
+  --outline-overlay-strong:  rgba(0,0,0,0.10);
+  --divider-alter: #ECECEF;
+  --grey-150:#F1F1F4; --grey-200:#ECECEF; --grey-600:#7E7E8F;
+  --grey-700:#605F76; --grey-800:#484760; --grey-900:#373649; --grey-1100:#272633;
+  --primary-700: #7264FF;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Pretendard',-apple-system,sans-serif;font-feature-settings:'salt' 1,'lnum' 1,'tnum' 1;background:var(--container-neutral-soft);min-width:1280px;color:var(--content-default);line-height:1.5;}
+
+/* Summary Cards */
+.summary-cards{display:flex;gap:12px;margin:12px 0 20px;}
+.summary-card{flex:1;background:#fff;border-radius:12px;padding:12px 16px;display:flex;align-items:center;cursor:pointer;}
+.summary-card--active{background:var(--container-primary-subtle);outline:1px solid #C3B8FF;outline-offset:-1px;}
+.summary-card__inner{display:flex;flex-direction:column;gap:4px;}
+.summary-card__label-row{display:flex;align-items:center;gap:4px;}
+.summary-card__label{font-size:14px;font-weight:600;color:var(--content-alter);line-height:1.5;}
+.summary-card__label--primary{color:var(--content-alter);}
+.summary-card--active .summary-card__label,
+.summary-card--active .summary-card__label--primary{color:var(--content-primary);}
+.summary-card__badge{font-size:11px;font-weight:600;color:#897DFF;line-height:1.5;}
+.summary-card__value-row{display:flex;align-items:center;gap:6px;}
+.summary-card__number{font-size:20px;font-weight:700;color:var(--content-alter);line-height:1.5;font-feature-settings:'salt' 1,'kern' 0,'lnum' 1,'tnum' 1;}
+.summary-card__number--primary{color:var(--content-alter);}
+.summary-card--active .summary-card__number,
+.summary-card--active .summary-card__number--primary{color:var(--content-primary);}
+.summary-card__unit{font-size:15px;font-weight:600;line-height:1.5;}
+.summary-card__unit--muted{color:var(--content-placeholder);}
+.summary-card__unit--primary-sub{color:var(--content-placeholder);}
+.summary-card--active .summary-card__unit--muted,
+.summary-card--active .summary-card__unit--primary-sub{color:#897DFF;}
+.summary-card__sep{font-size:15px;font-weight:600;color:var(--grey-200);line-height:1.5;}
+.summary-card__sep--light{color:var(--grey-200);}
+.summary-card--active .summary-card__sep,
+.summary-card--active .summary-card__sep--light{color:#D0CBFF;}
+
+/* GNB */
+.gnb{background:#fff;border-bottom:1px solid var(--grey-200);box-shadow:0 2px 3px rgba(0,0,0,.02);height:68px;display:flex;align-items:center;justify-content:space-between;padding:10px 60px;position:sticky;top:0;z-index:200;}
+.balance-box{background:#fff;border:1px solid var(--grey-150);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;}
+.balance-inner{display:flex;align-items:center;gap:4px;}
+.ic-money{width:24px;height:24px;display:flex;align-items:center;justify-content:center;}
+.balance-amount{font-size:16px;font-weight:600;color:var(--grey-1100);font-feature-settings:'salt' 1,'kern' 0,'lnum' 1,'tnum' 1;}
+.btn-charge{background:var(--primary-700);border:none;border-radius:4px;height:24px;padding:0 6px;font-size:12px;font-weight:600;color:#fff;font-family:'Pretendard',sans-serif;cursor:pointer;}
+.btn-charge:hover{filter:brightness(1.08);}
+.profile-box{background:var(--container-neutral-bright);border:1px solid var(--grey-200);border-radius:1000px;padding:12px;display:flex;align-items:center;gap:10px;cursor:pointer;}
+.profile-box:hover{background:var(--container-neutral-soft);}
+.profile-avatar{width:24px;height:24px;background:#E0D8FF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--primary-700);}
+.profile-name{font-size:16px;font-weight:500;color:var(--grey-700);}
+
+/* Page Header */
+.page-header{display:flex;align-items:center;justify-content:space-between;padding:24px 60px;}
+.page-title{font-size:24px;font-weight:700;color:var(--grey-900);}
+
+/* Content Area */
+.content-area{padding:0 60px 24px;display:flex;flex-direction:column;}
+
+/* Main Card */
+.filter-stats-card{background:#fff;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;}
+.filter-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:20px 20px 0;}
+
+
+/* Select Box */
+.sel-wrap{position:relative;flex-shrink:0;}
+.select-box{background:#fff;border:1px solid var(--outline-neutral-subtle);border-radius:8px;height:38px;padding:0 10px;display:flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap;user-select:none;transition:border-color .15s;}
+.select-box:hover{border-color:var(--content-disabled);}
+.select-box.open{border-color:var(--outline-primary-default);}
+.select-box .sel-label{font-size:13px;font-weight:400;color:var(--grey-800);}
+.select-box .sel-arrow{display:flex;align-items:center;transition:transform .18s;}
+.select-box.open .sel-arrow{transform:rotate(180deg);}
+.dropdown-menu{display:none;position:absolute;top:calc(100% + 6px);left:0;min-width:144px;background:#fff;border:1px solid var(--outline-neutral-subtle);border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.05),0 10px 40px rgba(0,0,0,.04);z-index:300;padding:6px;}
+.dropdown-menu.open{display:block;}
+.dropdown-item{height:36px;padding:0 12px;display:flex;align-items:center;font-size:13px;font-weight:400;color:var(--content-default);border-radius:6px;cursor:pointer;white-space:nowrap;transition:background .1s;}
+.dropdown-item:hover{background:var(--container-neutral-soft);}
+.dropdown-item.selected{font-weight:600;color:var(--content-primary);background:var(--container-primary-subtle);}
+
+/* Search Field */
+.search-field{background:#fff;border:1px solid var(--outline-neutral-subtle);border-radius:8px;height:38px;padding:0 10px;display:flex;align-items:center;gap:6px;flex:1;min-width:280px;max-width:400px;transition:border-color .15s;}
+.search-field:focus-within{border-color:var(--outline-primary-default);}
+.search-field input{border:none;outline:none;font-family:'Pretendard',sans-serif;font-size:13px;font-weight:400;color:var(--content-default);background:transparent;width:100%;font-feature-settings:'salt' 1,'lnum' 1,'tnum' 1;}
+.search-field input::placeholder{color:var(--content-placeholder);}
+
+.btn-query{background:var(--container-neutral-soft);border:none;border-radius:8px;height:38px;padding:6px 12px;font-family:'Pretendard',sans-serif;font-size:14px;font-weight:600;color:var(--content-alter);cursor:pointer;white-space:nowrap;transition:background .12s;}
+.btn-query:hover{background:var(--divider-alter);}
+.btn-query:active{transform:scale(.97);}
+
+/* Table Container */
+.table-container{background:#fff;border-radius:16px;overflow:hidden;}
+.data-row{padding:12px 20px;}
+
+/* Chips */
+.chip-group{display:flex;gap:6px;align-items:center;margin-bottom:10px;}
+.chip{border:1px solid var(--outline-neutral-subtle);background:#fff;border-radius:999px;padding:8px 12px;font-size:13px;font-weight:400;color:var(--content-default);cursor:pointer;white-space:nowrap;transition:all .15s;}
+.chip:hover{background:var(--container-neutral-soft);}
+.chip.active{background:var(--container-primary-subtle);border-color:var(--outline-primary-default);color:var(--content-primary);font-weight:600;}
+
+/* Data Row */
+.data-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;min-height:38px;}
+.data-stats{display:flex;align-items:center;gap:20px;}
+.stat-item{display:flex;align-items:center;gap:10px;}
+.stat-label{font-size:14px;font-weight:600;color:var(--grey-600);white-space:nowrap;}
+.stat-value-wrap{display:flex;align-items:center;gap:2px;}
+.stat-value{font-size:14px;font-weight:600;color:var(--grey-600);font-feature-settings:'salt' 1,'kern' 0,'lnum' 1,'tnum' 1;}
+.stat-unit{font-size:13px;font-weight:400;color:var(--content-placeholder);}
+.stat-divider{width:1px;height:16px;background:var(--divider-alter);flex-shrink:0;}
+.data-actions{display:flex;align-items:center;gap:10px;}
+.data-total{font-size:13px;font-weight:400;color:var(--content-subtle);white-space:nowrap;}
+.btn-outline-md{background:transparent;border:1px solid var(--outline-overlay-strong);border-radius:8px;height:38px;padding:6px 12px;display:inline-flex;align-items:center;gap:6px;font-family:'Pretendard',sans-serif;font-size:14px;font-weight:600;color:var(--content-alter);cursor:pointer;white-space:nowrap;transition:background .12s;}
+.btn-outline-md:hover{background:var(--container-neutral-soft);}
+.btn-outline-md:active{transform:scale(.97);}
+
+/* Col Edit */
+.col-edit-wrap{position:relative;}
+.btn-col-edit{background:#fff;border:1px solid var(--outline-overlay-strong);border-radius:8px;height:38px;padding:6px 12px;display:inline-flex;align-items:center;gap:6px;font-family:'Pretendard',sans-serif;font-size:13px;font-weight:400;color:var(--content-alter);cursor:pointer;white-space:nowrap;transition:background .12s;}
+.btn-col-edit:hover{background:var(--container-neutral-soft);}
+.btn-col-edit.open{border-color:var(--outline-primary-default);color:var(--content-primary);}
+.col-edit-panel{display:none;position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid var(--outline-neutral-subtle);border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.05),0 10px 40px rgba(0,0,0,.04);z-index:300;padding:8px;min-width:160px;}
+.col-edit-panel.open{display:block;}
+.col-edit-title{font-size:12px;font-weight:600;color:var(--content-subtle);padding:6px 10px 4px;letter-spacing:.02em;}
+.col-toggle-item{display:flex;align-items:center;height:36px;padding:0 6px;border-radius:6px;gap:4px;transition:background .1s;}
+.col-toggle-item:hover{background:var(--container-neutral-soft);}
+.col-toggle-item.dragging{opacity:0.35;}
+.col-toggle-item.drag-over{background:var(--container-primary-subtle);outline:1px solid var(--outline-primary-default);outline-offset:-1px;}
+.col-item-label{flex:1;font-size:13px;font-weight:400;color:var(--content-default);user-select:none;}
+.drag-handle{width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:grab;}
+.drag-handle:active{cursor:grabbing;}
+.btn-eye{width:28px;height:28px;background:none;border:none;cursor:pointer;padding:0;border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.btn-eye:hover{background:var(--divider-alter);}
+
+/* Table */
+.tbl-wrap{border:1px solid var(--outline-neutral-subtle);border-radius:12px;overflow:hidden;overflow-x:auto;margin:0 20px;}
+.tbl{width:100%;border-collapse:collapse;min-width:1400px;}
+.tbl thead th{background:var(--container-neutral-soft);border-bottom:1px solid var(--outline-neutral-subtle);border-right:1px solid var(--outline-neutral-subtle);height:40px;padding:10px 12px;font-size:13px;font-weight:600;color:var(--content-alter);text-align:left;white-space:nowrap;}
+.tbl thead th:last-child{border-right:none;}
+.th-inner{display:flex;align-items:center;gap:6px;}
+.th-help{width:16px;height:16px;display:inline-flex;align-items:center;cursor:pointer;position:relative;}
+.th-help:hover .tooltip-box{display:block;}
+.tooltip-box{display:none;position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#484760;color:#fff;border-radius:6px;padding:6px 10px;font-size:12px;font-weight:400;white-space:nowrap;z-index:400;box-shadow:0 4px 20px rgba(0,0,0,.1);pointer-events:none;}
+.tooltip-box::before{content:'';position:absolute;bottom:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-bottom-color:#484760;}
+.tbl tbody td{background:#fff;border-bottom:1px solid var(--outline-neutral-subtle);border-right:1px solid var(--outline-neutral-subtle);padding:10px 12px;font-size:13px;font-weight:400;color:var(--content-alter);vertical-align:middle;}
+.tbl tbody td:last-child{border-right:none;}
+.tbl tbody tr:last-child td{border-bottom:none;}
+.tbl tbody tr:hover td{background:var(--container-neutral-soft);cursor:pointer;}
+
+/* Tags */
+.tag{display:inline-flex;align-items:center;border-radius:6px;padding:4px 6px;font-size:12px;font-weight:600;white-space:nowrap;line-height:1.5;flex-shrink:0;}
+.tag-neutral{background:var(--container-neutral-soft);color:var(--content-alter);}
+.tag-success{background:var(--container-success-subtle);color:var(--content-success);}
+.tag-error{background:var(--container-error-subtle);color:var(--content-error);}
+.tag-primary{background:var(--container-primary-subtle);color:var(--content-primary);}
+.tag-warning{background:var(--container-warning-subtle);color:var(--content-warning);}
+.cell-null{color:var(--content-placeholder)!important;}
+.align-right{text-align:right!important;}
+.mono{font-feature-settings:'salt' 1,'kern' 0,'lnum' 1,'tnum' 1;}
+.procedure-cell{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.procedure-left{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.procedure-usage{font-size:13px;font-weight:400;color:var(--content-alter);white-space:nowrap;font-feature-settings:'salt' 1,'kern' 0,'lnum' 1,'tnum' 1;}
+.procedure-usage .slash{color:var(--content-disabled);}
+.btn-manage{background:var(--container-primary-default);border:none;border-radius:6px;padding:4px 8px;font-family:'Pretendard',sans-serif;font-size:12px;font-weight:600;color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:filter .12s;}
+.btn-manage:hover{filter:brightness(1.1);}
+.btn-sms{background:transparent;border:1px solid var(--outline-neutral-subtle);border-radius:6px;padding:4px 8px;font-family:'Pretendard',sans-serif;font-size:12px;font-weight:600;color:var(--content-alter);cursor:pointer;white-space:nowrap;transition:background .12s;}
+.btn-sms:hover{background:var(--container-neutral-soft);}
+.tbl-empty{height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;}
+.tbl-empty-icon{font-size:32px;color:var(--content-disabled);}
+.tbl-empty-text{font-size:14px;font-weight:400;color:var(--content-placeholder);}
+
+/* Pagination */
+.pagination-wrap{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-top:1px solid var(--outline-neutral-subtle);}
+.pagination{display:flex;align-items:center;gap:4px;}
+.page-btn{background:transparent;border:none;border-radius:4px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-family:'Pretendard',sans-serif;font-size:12px;font-weight:600;color:var(--content-alter);cursor:pointer;transition:background .1s;}
+.page-btn:hover:not([disabled]){background:var(--container-neutral-soft);}
+.page-btn.active{background:#fff;border:1px solid var(--outline-overlay-strong);color:var(--content-default);}
+.page-btn[disabled]{color:var(--content-disabled);cursor:default;}
+.rows-per-page{display:flex;align-items:center;gap:8px;position:relative;}
+.rows-label{font-size:13px;font-weight:400;color:var(--content-subtle);}
+.rows-select-box{background:#fff;border:1px solid var(--outline-neutral-subtle);border-radius:8px;height:34px;padding:0 10px;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:400;color:var(--content-alter);cursor:pointer;user-select:none;transition:border-color .15s;}
+.rows-select-box.open{border-color:var(--outline-primary-default);}
+.rows-select-box .sel-arrow{display:flex;align-items:center;transition:transform .18s;}
+.rows-select-box.open .sel-arrow{transform:rotate(180deg);}
+.rows-dropdown{display:none;position:absolute;bottom:calc(100% + 6px);left:0;background:#fff;border:1px solid var(--outline-neutral-subtle);border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.05);z-index:300;padding:6px;min-width:100px;}
+.rows-dropdown.open{display:block;}
+
+/* Toast */
+.toast-container{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;}
+.toast{background:#2D2B40;color:#fff;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,0,0,.15);animation:toastIn .2s ease,toastOut .25s ease 2.2s forwards;pointer-events:auto;}
+@keyframes toastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toastOut{from{opacity:1}to{opacity:0;transform:translateY(8px)}}
+
+/* Overlay */
+.overlay{position:fixed;inset:0;z-index:150;display:none;}
+.overlay.active{display:block;}
+
+/* CS현황 셀 */
+.cs-cell{display:flex;align-items:center;gap:1px;}
+.cs-toggle{cursor:pointer;transition:filter .1s;}
+.cs-toggle:hover{filter:brightness(0.93);}
+.cs-sep{width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.cs-sep svg{display:block;}
+
+/* 구매자 셀 */
+.buyer-phone{display:block;color:var(--content-subtle);font-size:12px;font-weight:400;line-height:1.5;}
+
+/* CS메모 셀 */
+.memo-cell{display:flex;align-items:center;gap:8px;width:100%;}
+.memo-text{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--content-alter);font-size:13px;}
+.btn-memo-edit{flex-shrink:0;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--content-placeholder);}
+.btn-memo-edit:hover{background:var(--container-neutral-soft);}
+
+/* 문자 전송 버튼 (outlined) */
+.btn-sms-outline{background:none;border:none;outline:1px solid rgba(0,0,0,0.10);outline-offset:-1px;border-radius:6px;padding:4px 8px;font-family:'Pretendard',sans-serif;font-size:12px;font-weight:600;color:var(--content-alter);cursor:pointer;white-space:nowrap;}
+.btn-sms-outline:hover{background:var(--container-neutral-soft);}
+
+/* Pagination dots */
+.page-dots{padding:4px 6px;font-size:12px;color:var(--content-placeholder);display:inline-flex;align-items:center;}
+
+/* SMS Modal */
+.sms-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.40);z-index:600;display:none;align-items:center;justify-content:center;}
+.sms-modal-bg.active{display:flex;}
+.sms-modal{background:#fff;border-radius:20px;width:480px;max-height:76vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.12);}
+.sms-modal-header{padding:18px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.sms-modal-title{font-size:18px;font-weight:600;color:var(--content-alter);}
+.sms-modal-close{width:32px;height:32px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:6px;padding:0;}
+.sms-modal-close:hover{background:var(--container-neutral-soft);}
+.sms-modal-customer{padding:12px 24px 16px;border-bottom:1px solid var(--outline-neutral-subtle);flex-shrink:0;}
+.sms-modal-cname{font-size:15px;font-weight:600;color:var(--content-default);}
+.sms-modal-cphone{font-size:13px;font-weight:400;color:var(--content-subtle);margin-top:2px;}
+.sms-history{flex:1;overflow-y:auto;padding:16px 24px;display:flex;flex-direction:column;gap:16px;min-height:120px;}
+.sms-history-empty{display:flex;align-items:center;justify-content:center;height:100%;font-size:13px;color:var(--content-placeholder);}
+.sms-msg-item{display:flex;flex-direction:column;align-items:flex-start;gap:4px;}
+.sms-msg-bubble{background:var(--container-neutral-soft);border-radius:4px 12px 12px 12px;padding:10px 14px;font-size:13px;font-weight:400;color:var(--content-alter);line-height:1.5;max-width:84%;word-break:keep-all;}
+.sms-msg-meta{font-size:11px;color:var(--content-placeholder);padding-left:2px;}
+.sms-compose{padding:14px 24px 20px;border-top:1px solid var(--outline-neutral-subtle);display:flex;flex-direction:column;gap:10px;flex-shrink:0;}
+.sms-compose-textarea{width:100%;height:88px;border:1px solid var(--outline-neutral-subtle);border-radius:8px;padding:10px 12px;font-family:'Pretendard',sans-serif;font-size:13px;font-weight:400;color:var(--content-alter);resize:none;outline:none;line-height:1.5;}
+.sms-compose-textarea:focus{border-color:var(--outline-primary-default);}
+.sms-compose-textarea::placeholder{color:var(--content-placeholder);}
+.sms-compose-footer{display:flex;align-items:center;justify-content:space-between;}
+.sms-char-count{font-size:12px;color:var(--content-placeholder);}
+.sms-send-btn{height:38px;padding:0 20px;background:var(--container-primary-default);border:none;border-radius:8px;font-family:'Pretendard',sans-serif;font-size:14px;font-weight:600;color:#fff;cursor:pointer;}
+.sms-send-btn:hover{filter:brightness(1.08);}
+
+/* Drawer */
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.20);z-index:400;opacity:0;pointer-events:none;transition:opacity .25s;}
+.drawer-overlay.active{opacity:1;pointer-events:auto;}
+.drawer{position:fixed;top:0;right:0;width:560px;height:100vh;background:#fff;box-shadow:0 2px 50px rgba(0,0,0,.05),0 4px 50px rgba(0,0,0,.03),0 2px 150px rgba(0,0,0,.03);z-index:500;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);}
+.drawer.open{transform:translateX(0);}
+.drawer-header{height:68px;padding:16px 24px;display:flex;align-items:center;gap:4px;flex-shrink:0;}
+.drawer-close{width:24px;height:24px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;border-radius:4px;}
+.drawer-close:hover{background:var(--container-neutral-soft);}
+.drawer-title{flex:1;font-size:24px;font-weight:700;color:var(--content-alter);line-height:1.5;font-family:'Pretendard',sans-serif;}
+.drawer-body{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
+.drawer-section{padding:20px 24px;}
+.drawer-section+.drawer-section{border-top:1px solid var(--outline-neutral-subtle);}
+.drawer-customer-name{font-size:18px;font-weight:600;color:var(--content-alter);line-height:1.5;margin-bottom:14px;}
+.drawer-info-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;}
+.drawer-info-label{width:72px;flex-shrink:0;font-size:13px;font-weight:600;color:var(--content-placeholder);line-height:1.5;}
+.drawer-info-value{font-size:14px;font-weight:400;color:var(--content-alter);line-height:1.5;}
+.drawer-tickets-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.drawer-tickets-total{font-size:14px;font-weight:600;color:var(--content-alter);}
+.drawer-tickets-expiry{display:flex;align-items:center;gap:8px;font-size:13px;}
+.drawer-expiry-label{color:var(--content-placeholder);}
+.drawer-expiry-date{color:var(--content-subtle);font-size:14px;}
+.drawer-ticket-card{border:1px solid var(--outline-neutral-subtle);border-radius:12px;overflow:hidden;margin-bottom:16px;}
+.drawer-ticket-head{padding:14px 16px;background:var(--container-neutral-bright);display:flex;align-items:center;gap:10px;cursor:pointer;}
+.drawer-ticket-head-info{flex:1;}
+.drawer-ticket-name{font-size:16px;font-weight:600;color:var(--content-alter);line-height:1.5;}
+.drawer-ticket-sub{font-size:13px;font-weight:400;color:var(--content-subtle);line-height:1.5;margin-top:4px;}
+.drawer-ticket-chevron{width:24px;height:24px;display:flex;align-items:center;justify-content:center;transition:transform .18s;}
+.drawer-ticket-card.collapsed .drawer-ticket-chevron{transform:rotate(-90deg);}
+.drawer-ticket-body{padding:0 16px;display:flex;flex-direction:column;}
+.drawer-session-row{padding:14px 0;border-bottom:1px solid var(--outline-neutral-subtle);}
+.drawer-session-row:last-child{border-bottom:none;}
+.drawer-ticket-card.collapsed .drawer-ticket-body{display:none;}
+.drawer-session-row{display:flex;justify-content:space-between;align-items:flex-end;}
+.drawer-session-left{display:flex;flex-direction:column;gap:6px;}
+.drawer-session-top{display:flex;align-items:center;gap:6px;}
+.drawer-session-badge{height:20px;padding:2px 4px;border-radius:4px;font-size:11px;font-weight:600;line-height:1.5;display:inline-flex;align-items:center;}
+.drawer-session-badge.used{background:var(--container-neutral-soft);color:var(--content-alter);}
+.drawer-session-badge.avail{background:var(--container-success-subtle);color:var(--content-success);}
+.drawer-session-num{font-size:13px;font-weight:600;color:var(--content-alter);}
+.drawer-session-order{font-size:13px;color:var(--content-placeholder);}
+.drawer-session-price{font-size:13px;color:var(--content-subtle);}
+.drawer-session-right{display:flex;align-items:flex-end;gap:12px;}
+.drawer-session-dates{display:flex;gap:12px;}
+.drawer-date-item{display:flex;align-items:center;gap:4px;}
+.drawer-date-label{font-size:13px;font-weight:600;color:var(--content-placeholder);white-space:nowrap;}
+.drawer-date-value{font-size:13px;color:var(--content-subtle);}
+.btn-use{padding:6px 10px;background:var(--container-primary-default);border:none;border-radius:6px;font-family:'Pretendard',sans-serif;font-size:12px;font-weight:600;color:#fff;cursor:pointer;white-space:nowrap;}
+.btn-use:hover{filter:brightness(1.08);}
+.drawer-accordion-row{padding:20px 0;display:flex;justify-content:space-between;align-items:center;cursor:pointer;}
+.drawer-accordion-title{font-size:16px;font-weight:600;color:var(--content-alter);}
+.drawer-memo-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.drawer-memo-title{font-size:16px;font-weight:600;color:var(--content-alter);}
+.btn-sms-sm{padding:6px 10px;background:none;border:none;outline:1px solid rgba(0,0,0,0.10);outline-offset:-1px;border-radius:6px;font-family:'Pretendard',sans-serif;font-size:12px;font-weight:600;color:var(--content-alter);cursor:pointer;}
+.drawer-textarea{width:100%;height:177px;padding:10px;border:none;outline:1px solid var(--outline-neutral-subtle);outline-offset:-1px;border-radius:8px;font-family:'Pretendard',sans-serif;font-size:13px;color:var(--content-alter);resize:none;box-sizing:border-box;margin-bottom:10px;}
+.drawer-textarea:focus{outline-color:var(--outline-primary-default);}
+.btn-save{width:100%;height:40px;background:var(--container-primary-default);border:none;border-radius:8px;font-family:'Pretendard',sans-serif;font-size:16px;font-weight:600;color:#fff;cursor:pointer;}
+.btn-save:hover{filter:brightness(1.08);}
+</style>
+</head>
+<body>
+
+<div class="overlay" id="overlay"></div>
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- GNB -->
+<header class="gnb">
+  <div class="balance-box">
+    <div class="balance-inner">
+      <div class="ic-money">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z" fill="#897DFF"/>
+        </svg>
+      </div>
+      <span class="balance-amount">999,999,999,000원</span>
+    </div>
+    <button class="btn-charge" id="btnCharge">충전</button>
+  </div>
+  <div class="profile-box">
+    <div class="profile-avatar">M</div>
+    <span class="profile-name">marketer_01</span>
+  </div>
+</header>
+
+<!-- Page Header -->
+<div class="page-header">
+  <h1 class="page-title">판매내역</h1>
+</div>
+
+<!-- Content Area -->
+<div class="content-area">
+
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <!-- 전체 결제건 -->
+    <div class="summary-card summary-card--default" id="scard-all" data-card="all">
+      <div class="summary-card__inner">
+        <span class="summary-card__label">전체 결제건</span>
+        <div class="summary-card__value-row">
+          <span class="summary-card__number" id="scardAllCount">14,342</span>
+          <span class="summary-card__unit summary-card__unit--muted">건</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 미사용 시술권 -->
+    <div class="summary-card summary-card--primary summary-card--active" id="scard-unused" data-card="unused">
+      <div class="summary-card__inner">
+        <span class="summary-card__label summary-card__label--primary">미사용 시술권</span>
+        <div class="summary-card__value-row">
+          <span class="summary-card__number summary-card__number--primary" id="scardUnusedCount">521</span>
+          <span class="summary-card__unit summary-card__unit--primary-sub">건</span>
+          <span class="summary-card__sep">/</span>
+          <span class="summary-card__number summary-card__number--primary" id="scardUnusedAmt">422,000</span>
+          <span class="summary-card__unit summary-card__unit--primary-sub">원</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 만료임박 시술권 -->
+    <div class="summary-card summary-card--default" id="scard-expiring" data-card="expiring">
+      <div class="summary-card__inner">
+        <div class="summary-card__label-row">
+          <span class="summary-card__label">만료임박 시술권</span>
+          <span class="summary-card__badge">30일 후 환불 예정</span>
+        </div>
+        <div class="summary-card__value-row">
+          <span class="summary-card__number" id="scardExpiringCount">19</span>
+          <span class="summary-card__unit summary-card__unit--muted">건</span>
+          <span class="summary-card__sep summary-card__sep--light">/</span>
+          <span class="summary-card__number" id="scardExpiringAmt">162,000</span>
+          <span class="summary-card__unit summary-card__unit--muted">원</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter + Stats Card -->
+  <div class="filter-stats-card">
+    <div class="filter-row">
+
+      <!-- Select: 기간 -->
+      <div class="sel-wrap" id="wrap-period">
+        <div class="select-box js-sel-period" id="sel-period">
+          <span class="sel-label js-lbl-period" id="lbl-period">1년</span>
+          <span class="sel-arrow"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z" fill="#494760"/></svg></span>
+        </div>
+        <div class="dropdown-menu js-dd-period" id="dd-period">
+          <div class="dropdown-item" data-value="1주">1주</div>
+          <div class="dropdown-item" data-value="1개월">1개월</div>
+          <div class="dropdown-item" data-value="3개월">3개월</div>
+          <div class="dropdown-item" data-value="6개월">6개월</div>
+          <div class="dropdown-item selected" data-value="1년">1년</div>
+        </div>
+      </div>
+
+      <!-- Select: 유입경로 -->
+      <div class="sel-wrap" id="wrap-source">
+        <div class="select-box js-sel-source" id="sel-source">
+          <span class="sel-label js-lbl-source" id="lbl-source">유입경로</span>
+          <span class="sel-arrow"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z" fill="#494760"/></svg></span>
+        </div>
+        <div class="dropdown-menu js-dd-source" id="dd-source">
+          <div class="dropdown-item selected" data-value="all">전체</div>
+          <div class="dropdown-item" data-value="app">바비톡앱</div>
+          <div class="dropdown-item" data-value="web">웹</div>
+          <div class="dropdown-item" data-value="other">기타</div>
+        </div>
+      </div>
+
+      <!-- Select: 결제 상태 -->
+      <div class="sel-wrap" id="wrap-paystat">
+        <div class="select-box js-sel-paystat" id="sel-paystat">
+          <span class="sel-label js-lbl-paystat" id="lbl-paystat">결제 상태</span>
+          <span class="sel-arrow"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z" fill="#494760"/></svg></span>
+        </div>
+        <div class="dropdown-menu js-dd-paystat" id="dd-paystat">
+          <div class="dropdown-item selected" data-value="all">전체</div>
+          <div class="dropdown-item" data-value="paid">결제 완료</div>
+          <div class="dropdown-item" data-value="refund-partial">부분환불</div>
+          <div class="dropdown-item" data-value="refund-full">전체환불</div>
+        </div>
+      </div>
+
+      <!-- Search -->
+      <div class="search-field">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0">
+          <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="#A4A3AF"/>
+        </svg>
+        <input type="text" id="searchInput" placeholder="주문번호, 이벤트명, 고객명, 시술권번호, 전화번호 검색">
+      </div>
+
+      <button class="btn-query" id="btnQuery">조회</button>
+    </div>
+
+    <!-- Data Summary -->
+    <div class="data-row">
+        <div class="data-stats">
+          <div class="stat-item">
+            <span class="stat-label">결제 건</span>
+            <div class="stat-value-wrap">
+              <span class="stat-value mono js-stat-pay" id="statPay">32</span>
+              <span class="stat-unit">건</span>
+            </div>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-label">시술권 갯수</span>
+            <div class="stat-value-wrap">
+              <span class="stat-value mono js-stat-proc" id="statProc">123</span>
+              <span class="stat-unit">건</span>
+            </div>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-label">판매금액</span>
+            <div class="stat-value-wrap">
+              <span class="stat-value mono js-stat-amt" id="statAmt">422,000</span>
+              <span class="stat-unit">원</span>
+            </div>
+          </div>
+        </div>
+        <div class="data-actions">
+          <span class="data-total" id="dataTotal">1,102건</span>
+          <button class="btn-outline-md" id="btnDownload">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" fill="#494760"/></svg>
+            다운로드
+          </button>
+          <div class="col-edit-wrap">
+            <button class="btn-col-edit" id="btnColEdit">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z" fill="#494760"/></svg>
+              열편집
+            </button>
+            <div class="col-edit-panel" id="colEditPanel">
+              <div class="col-edit-title">열 표시 설정</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Table -->
+      <div class="tbl-wrap">
+        <table class="tbl" id="mainTable">
+          <thead><tr class="js-tbl-head" id="tblHead"></tr></thead>
+          <tbody class="js-tbl-body" id="tblBody"></tbody>
+        </table>
+        <div class="tbl-empty" id="tblEmpty" style="display:none;">
+          <div class="tbl-empty-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M20 6H4c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H4V8h16v8zM6 10h12v2H6zm0 3h8v2H6z" fill="#DADADF"/></svg>
+          </div>
+          <div class="tbl-empty-text">검색 결과가 없어요</div>
+        </div>
+      </div>
+
+    <!-- Pagination -->
+    <div class="pagination-wrap">
+      <div class="pagination" id="paginationEl"></div>
+      <div class="rows-per-page">
+        <div class="rows-select-box" id="rowsBox">
+          <span class="js-rows-lbl" id="rowsLabel">20개</span>
+          <span class="sel-arrow"><svg width="14" height="14" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z" fill="#494760"/></svg></span>
+        </div>
+        <div class="rows-dropdown" id="rowsDropdown">
+          <div class="dropdown-item" data-rows="10">10개</div>
+          <div class="dropdown-item selected" data-rows="20">20개</div>
+          <div class="dropdown-item" data-rows="50">50개</div>
+          <div class="dropdown-item" data-rows="100">100개</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+/* ── Data ── */
+var DATA = [
+  {cs:'확인',cst:'neutral',date:'25-06-18 17:28',order:'E3119-0303-1622',buyer:'김바비',phone:'010-1234-5678',event:'슈링크 500샷 특가',pay:'부분환불',payt:'error',proc:'시술전',proct:'primary',unused:1,total:1,comment:'예약전화 전 문자 요망',amount:124000,memo:'1차 쩡/ 전화 예정',src:'app',visit:'미내원',smsLog:[{date:'25-06-18 17:30',msg:'안녕하세요 고객님! 예약 확인차 연락드립니다. 편하신 시간에 전화 주시면 감사하겠습니다.'},{date:'25-06-19 10:15',msg:'내일 오후 2시 예약이 잡혀 있습니다. 내원 전 확인 부탁드립니다.'}]},
+  {cs:'확인',cst:'neutral',date:'25-06-18 17:28',order:'E3119-0303-1623',buyer:'박바비',phone:'010-2345-6789',event:'슈링크 500샷 특가',pay:'전체환불',payt:'neutral',proc:'환불',proct:'neutral',unused:0,total:1,comment:'예약전화 전 문자 요망',amount:124000,memo:'1차 쩡/ 전화 예정',src:'web',visit:'내원완료'},
+  {cs:'신규',cst:'primary',date:'25-06-18 17:28',order:'E3119-0303-1624',buyer:'이바비',phone:'010-3456-7890',event:'슈링크 500샷 특가',pay:'결제 완료',payt:'success',proc:'시술완료',proct:'neutral',unused:0,total:1,comment:'예약전화 전 문자 요망',amount:124000,memo:'1차 쩡/ 전화 예정',src:'app',visit:'내원완료'},
+  {cs:'신규',cst:'primary',date:'25-06-17 14:05',order:'E3119-0303-1589',buyer:'최바비',phone:'010-4567-8901',event:'울쎄라 포커스 100샷',pay:'결제 완료',payt:'success',proc:'시술중',proct:'warning',unused:1,total:2,comment:'-',amount:248000,memo:'-',src:'app',visit:'미내원'},
+  {cs:'확인',cst:'neutral',date:'25-06-16 09:33',order:'E3119-0303-1544',buyer:'정바비',phone:'010-5678-9012',event:'보톡스 이마+미간+눈가 패키지',pay:'결제 완료',payt:'success',proc:'시술완료',proct:'neutral',unused:0,total:1,comment:'상담 후 예약 부탁드립니다',amount:89000,memo:'상담 완료',src:'web',visit:'내원완료'},
+  {cs:'신규',cst:'primary',date:'25-06-15 11:20',order:'E3119-0303-1501',buyer:'한바비',phone:'010-6789-0123',event:'리프팅 리니지 200샷',pay:'결제 완료',payt:'success',proc:'시술전',proct:'primary',unused:2,total:2,comment:'오후 2시 이후 예약 원함',amount:320000,memo:'-',src:'app',visit:'미내원',expiring:true},
+  {cs:'확인',cst:'neutral',date:'25-05-10 14:20',order:'E3119-0303-1050',buyer:'엄바비',phone:'010-7788-9900',event:'제모 5회권',pay:'결제 완료',payt:'success',proc:'시술중',proct:'warning',unused:2,total:5,comment:'주말 예약 선호',amount:350000,memo:'-',src:'app',visit:'미내원'},
+  {cs:'확인',cst:'neutral',date:'25-04-20 09:15',order:'E3119-0303-0922',buyer:'탁바비',phone:'010-8899-0011',event:'제모 5회권',pay:'결제 완료',payt:'success',proc:'시술완료',proct:'neutral',unused:0,total:5,comment:'-',amount:350000,memo:'5회 모두 완료',src:'web',visit:'내원완료'},
+  {cs:'확인',cst:'neutral',date:'25-04-15 10:30',order:'E3119-0303-0891',buyer:'전바비',phone:'010-6677-8899',event:'리프팅 리니지 200샷 3회권',pay:'결제 완료',payt:'success',proc:'시술완료',proct:'neutral',unused:0,total:3,comment:'-',amount:780000,memo:'3회 모두 완료',src:'app',visit:'내원완료'},
+  {cs:'확인',cst:'neutral',date:'25-06-14 16:47',order:'E3119-0303-1488',buyer:'오바비',phone:'010-7890-1234',event:'물광주사 3회 패키지',pay:'결제 완료',payt:'success',proc:'시술전',proct:'primary',unused:3,total:3,comment:'-',amount:195000,memo:'3회차 잔여',src:'web',visit:'미내원',expiring:true,smsLog:[{date:'25-06-14 17:00',msg:'안녕하세요! 구매해주셔서 감사합니다. 예약은 카카오톡 또는 전화로 가능합니다.'},{date:'25-06-16 09:00',msg:'2회차 시술 예약 안내 문자입니다. 이번 주 금요일 오후 3시로 예약 도와드릴까요?'},{date:'25-06-17 14:30',msg:'3회차 잔여 이용 기한은 26년 6월 14일까지입니다. 일정 조율 연락 주세요.'}]},
+  {cs:'신규',cst:'primary',date:'25-06-13 10:15',order:'E3119-0303-1466',buyer:'강바비',phone:'010-8901-2345',event:'보톡스 이마+미간+눈가 패키지',pay:'부분환불',payt:'error',proc:'시술중',proct:'warning',unused:1,total:2,comment:'내원 전 연락 필수',amount:89000,memo:'-',src:'app',visit:'미내원'},
+  {cs:'확인',cst:'neutral',date:'25-06-12 13:30',order:'E3119-0303-1441',buyer:'윤바비',phone:'010-9012-3456',event:'슈링크 500샷 특가',pay:'결제 완료',payt:'success',proc:'시술완료',proct:'neutral',unused:0,total:1,comment:'-',amount:124000,memo:'완료 확인',src:'other',visit:'내원완료'},
+  {cs:'신규',cst:'primary',date:'25-06-11 09:05',order:'E3119-0303-1412',buyer:'임바비',phone:'010-0123-4567',event:'울쎄라 포커스 100샷',pay:'결제 완료',payt:'success',proc:'시술전',proct:'primary',unused:1,total:1,comment:'토요일 예약 원함',amount:248000,memo:'-',src:'app',visit:'미내원',expiring:true},
+  {cs:'확인',cst:'neutral',date:'25-06-10 15:22',order:'E3119-0303-1395',buyer:'조바비',phone:'010-1357-2468',event:'물광주사 3회 패키지',pay:'전체환불',payt:'neutral',proc:'환불',proct:'neutral',unused:0,total:3,comment:'-',amount:195000,memo:'환불 완료',src:'web',visit:'내원완료'},
+  {cs:'신규',cst:'primary',date:'25-06-09 11:44',order:'E3119-0303-1378',buyer:'신바비',phone:'010-2468-1357',event:'리프팅 리니지 200샷',pay:'결제 완료',payt:'success',proc:'시술중',proct:'warning',unused:1,total:2,comment:'오전 예약 희망',amount:320000,memo:'-',src:'app',visit:'미내원'},
+  {cs:'확인',cst:'neutral',date:'25-06-08 14:10',order:'E3119-0303-1355',buyer:'권바비',phone:'010-3579-4680',event:'슈링크 500샷 특가',pay:'결제 완료',payt:'success',proc:'시술완료',proct:'neutral',unused:0,total:1,comment:'재방문 고객',amount:124000,memo:'VIP 메모',src:'app',visit:'내원완료'},
+  {cs:'신규',cst:'primary',date:'25-06-07 16:55',order:'E3119-0303-1332',buyer:'황바비',phone:'010-4680-5791',event:'보톡스 이마+미간+눈가 패키지',pay:'결제 완료',payt:'success',proc:'시술전',proct:'primary',unused:1,total:1,comment:'-',amount:89000,memo:'-',src:'web',visit:'미내원',expiring:true},
+  {cs:'확인',cst:'neutral',date:'25-06-06 10:30',order:'E3119-0303-1309',buyer:'안바비',phone:'010-5791-6802',event:'울쎄라 포커스 100샷',pay:'부분환불',payt:'error',proc:'시술전',proct:'primary',unused:1,total:2,comment:'날짜 조율 중',amount:248000,memo:'1회 환불 처리',src:'app',visit:'미내원',expiring:true},
+  {cs:'신규',cst:'primary',date:'25-06-05 12:20',order:'E3119-0303-1288',buyer:'송바비',phone:'010-6802-7913',event:'물광주사 3회 패키지',pay:'결제 완료',payt:'success',proc:'시술완료',proct:'neutral',unused:0,total:3,comment:'-',amount:195000,memo:'완료',src:'other',visit:'내원완료'},
+  {cs:'확인',cst:'neutral',date:'25-06-04 09:45',order:'E3119-0303-1261',buyer:'류바비',phone:'010-7913-8024',event:'리프팅 리니지 200샷',pay:'결제 완료',payt:'success',proc:'시술중',proct:'warning',unused:1,total:2,comment:'평일 오후 예약',amount:320000,memo:'-',src:'app',visit:'미내원'},
+  {cs:'신규',cst:'primary',date:'25-06-03 17:10',order:'E3119-0303-1244',buyer:'노바비',phone:'010-8024-9135',event:'슈링크 500샷 특가',pay:'전체환불',payt:'neutral',proc:'환불',proct:'neutral',unused:0,total:1,comment:'-',amount:124000,memo:'환불 완료',src:'web',visit:'내원완료'},
+  {cs:'확인',cst:'neutral',date:'25-06-02 13:55',order:'E3119-0303-1221',buyer:'하바비',phone:'010-9135-0246',event:'보톡스 이마+미간+눈가 패키지',pay:'결제 완료',payt:'success',proc:'시술전',proct:'primary',unused:1,total:1,comment:'주말 예약 희망',amount:89000,memo:'-',src:'app',visit:'미내원',expiring:true},
+  {cs:'신규',cst:'primary',date:'25-06-01 11:00',order:'E3119-0303-1198',buyer:'마바비',phone:'010-0246-1357',event:'울쎄라 포커스 100샷',pay:'결제 완료',payt:'success',proc:'시술중',proct:'warning',unused:2,total:3,comment:'알레르기 주의',amount:248000,memo:'특이사항 참고',src:'app',visit:'미내원'},
+  {cs:'확인',cst:'neutral',date:'25-05-31 15:33',order:'E3119-0303-1175',buyer:'구바비',phone:'010-1122-3344',event:'물광주사 3회 패키지',pay:'결제 완료',payt:'success',proc:'시술완료',proct:'neutral',unused:0,total:3,comment:'-',amount:195000,memo:'완료 확인',src:'web',visit:'내원완료'},
+  {cs:'신규',cst:'primary',date:'25-05-30 10:48',order:'E3119-0303-1152',buyer:'변바비',phone:'010-2233-4455',event:'리프팅 리니지 200샷',pay:'부분환불',payt:'error',proc:'시술전',proct:'primary',unused:2,total:3,comment:'1회 취소 요청',amount:320000,memo:'환불 1회 처리',src:'app',visit:'미내원'},
+  {cs:'확인',cst:'neutral',date:'25-05-29 14:22',order:'E3119-0303-1129',buyer:'석바비',phone:'010-3344-5566',event:'슈링크 500샷 특가',pay:'결제 완료',payt:'success',proc:'시술완료',proct:'neutral',unused:0,total:1,comment:'-',amount:124000,memo:'-',src:'other',visit:'내원완료'},
+  {cs:'신규',cst:'primary',date:'25-05-28 09:15',order:'E3119-0303-1106',buyer:'표바비',phone:'010-4455-6677',event:'보톡스 이마+미간+눈가 패키지',pay:'결제 완료',payt:'success',proc:'시술전',proct:'primary',unused:1,total:1,comment:'전날 확인 전화 요망',amount:89000,memo:'-',src:'app',visit:'미내원',expiring:true},
+  {cs:'확인',cst:'neutral',date:'25-05-27 16:05',order:'E3119-0303-1083',buyer:'백바비',phone:'010-5566-7788',event:'울쎄라 포커스 100샷',pay:'결제 완료',payt:'success',proc:'시술중',proct:'warning',unused:1,total:2,comment:'-',amount:248000,memo:'-',src:'web',visit:'미내원'},
+];
+
+/* ── Columns ── */
+var COLS = [
+  {key:'cs',     label:'CS현황',     width:'110px', align:'center'},
+  {key:'date',   label:'결제일',     width:'156px'},
+  {key:'order',  label:'주문번호',   width:'180px'},
+  {key:'buyer',  label:'구매자',     width:'110px'},
+  {key:'event',  label:'이벤트명',   minWidth:'180px'},
+  {key:'pay',    label:'결제 상태',  width:'134px'},
+  {key:'proc',   label:'시술권 현황',width:'276px', tooltip:'미사용/전체 시술권 현황이에요'},
+  {key:'comment',label:'구매자 코멘트',minWidth:'160px'},
+  {key:'amount', label:'판매금액',   width:'130px', align:'right'},
+  {key:'memo',   label:'CS메모',    minWidth:'180px'},
+  {key:'sms',    label:'문자',       width:'100px'},
+];
+
+/* ── State ── */
+var st = {
+  card: 'unused',   // all | unused | expiring
+  paystat: 'all',
+  source: 'all',
+  query: '',
+  page: 1,
+  rpp: 20,
+  colVis: {},
+  filtered: [],
+};
+COLS.forEach(function(c){ st.colVis[c.key] = true; });
+
+/* ── Helpers ── */
+function tag(cls, text){ return '<span class="tag tag-'+cls+'">'+text+'</span>'; }
+var CLASS_MAP = {
+  'overlay':'.overlay','btnCharge':'.btn-charge','btnDownload':'.btn-outline-md',
+  'btnQuery':'.btn-query','searchInput':'.search-field input',
+  'sel-period':'.js-sel-period','lbl-period':'.js-lbl-period','dd-period':'.js-dd-period',
+  'sel-source':'.js-sel-source','lbl-source':'.js-lbl-source','dd-source':'.js-dd-source',
+  'sel-paystat':'.js-sel-paystat','lbl-paystat':'.js-lbl-paystat','dd-paystat':'.js-dd-paystat',
+  'statPay':'.js-stat-pay','statProc':'.js-stat-proc','statAmt':'.js-stat-amt',
+  'dataTotal':'.data-total','btnColEdit':'.btn-col-edit','colEditPanel':'.col-edit-panel',
+  'tblHead':'.js-tbl-head','tblBody':'.js-tbl-body','tblEmpty':'.tbl-empty',
+  'rowsBox':'.rows-select-box','rowsDropdown':'.rows-dropdown','rowsLabel':'.js-rows-lbl',
+  'paginationEl':'.pagination','toastContainer':'.toast-container'
+};
+function $id(id){ return document.getElementById(id)||document.querySelector(CLASS_MAP[id]||null); }
+function procStatus(r){
+  if(r.unused === r.total) return '시술전';
+  if(r.unused > 0)         return '시술중';
+  return '시술완료';
+}
+
+/* ── Filter & Render ── */
+function updateSummaryCards(){
+  var allCount = DATA.length;
+  var unusedRows = DATA.filter(function(r){ return r.unused > 0; });
+  var unusedAmt  = unusedRows.reduce(function(s,r){ return s+r.amount; }, 0);
+  var expiringRows = DATA.filter(function(r){ return r.expiring; });
+  var expiringAmt  = expiringRows.reduce(function(s,r){ return s+r.amount; }, 0);
+  document.getElementById('scardAllCount').textContent     = allCount.toLocaleString();
+  var unusedTickets   = unusedRows.reduce(function(s,r){ return s+r.unused; }, 0);
+  var expiringTickets = expiringRows.reduce(function(s,r){ return s+r.unused; }, 0);
+  document.getElementById('scardUnusedCount').textContent  = unusedTickets.toLocaleString();
+  document.getElementById('scardUnusedAmt').textContent    = unusedAmt.toLocaleString();
+  document.getElementById('scardExpiringCount').textContent= expiringTickets.toLocaleString();
+  document.getElementById('scardExpiringAmt').textContent  = expiringAmt.toLocaleString();
+}
+
+function applyFilters(){
+  var q = st.query.trim().toLowerCase();
+  st.filtered = DATA.filter(function(r){
+    // card filter
+    if(st.card === 'unused'   && r.unused <= 0) return false;
+    if(st.card === 'expiring' && !r.expiring)   return false;
+    // paystat
+    var pm = {paid:'결제 완료','refund-partial':'부분환불','refund-full':'전체환불'};
+    if(st.paystat !== 'all' && r.pay !== pm[st.paystat]) return false;
+    // source
+    if(st.source !== 'all' && r.src !== st.source) return false;
+    // search
+    if(q){
+      var hay = [r.order,r.event,r.buyer,r.comment,r.memo].join(' ').toLowerCase();
+      if(hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+  st.page = 1;
+  updateStats();
+  renderTable();
+  renderPagination();
+}
+
+function updateStats(){
+  var rows = st.filtered;
+  var procCount = rows.reduce(function(s,r){ return s + (st.card === 'unused' ? r.unused : r.total); }, 0);
+  var amt = rows.reduce(function(s,r){return s+r.amount;},0);
+  $id('statPay').textContent   = rows.length.toLocaleString();
+  $id('statProc').textContent  = procCount.toLocaleString();
+  $id('statAmt').textContent   = amt.toLocaleString();
+  $id('dataTotal').textContent = rows.length.toLocaleString()+'건';
+}
+
+function renderTable(){
+  // Header
+  var head = $id('tblHead');
+  head.innerHTML = COLS.map(function(c){
+    if(!st.colVis[c.key]) return '';
+    var w = c.width ? 'style="width:'+c.width+'"' : (c.minWidth ? 'style="min-width:'+c.minWidth+'"' : '');
+    var tip = c.tooltip ? '<span class="th-help"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" fill="#A4A3AF"/></svg><div class="tooltip-box">'+c.tooltip+'</div></span>' : '';
+    var ri = c.align==='right' ? ' style="text-align:right"' : '';
+    return '<th '+w+ri+'><div class="th-inner"'+(c.align==='right'?' style="justify-content:flex-end"':'')+'>'+c.label+tip+'</div></th>';
+  }).join('');
+
+  // Body
+  var tbody = $id('tblBody');
+  var empty = $id('tblEmpty');
+  var start = (st.page-1)*st.rpp;
+  var rows = st.filtered.slice(start, start+st.rpp);
+
+  if(!rows.length){
+    tbody.innerHTML = '';
+    empty.style.display = 'flex';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = rows.map(function(r){
+    var cells = COLS.map(function(c){
+      if(!st.colVis[c.key]) return '';
+      return '<td>'+cellHtml(c.key,r)+'</td>';
+    }).join('');
+    return '<tr data-order="'+r.order+'" data-buyer="'+r.buyer+'">'+cells+'</tr>';
+  }).join('');
+}
+
+function cellHtml(key, r){
+  switch(key){
+    case 'cs':
+      var visitColor = r.visit === '미내원' ? 'primary' : 'neutral';
+      var csBtn  = '<span class="tag tag-'+r.cst+' cs-toggle" data-action="toggle-cs" data-order="'+r.order+'">'+r.cs+'</span>';
+      var visBtn = '<span class="tag tag-'+visitColor+' cs-toggle" data-action="toggle-visit" data-order="'+r.order+'">'+r.visit+'</span>';
+      return '<div class="cs-cell">'+csBtn+'<span class="cs-sep"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M10 6l6 6-6 6" stroke="#DADADF" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>'+visBtn+'</div>';
+    case 'date':    return '<span class="mono">'+r.date+'</span>';
+    case 'order':   return '<span class="mono">'+r.order+'</span>';
+    case 'buyer': return r.buyer+(r.phone?'<br><span class="buyer-phone">'+r.phone+'</span>':'');
+    case 'event':   return r.event;
+    case 'pay':     return r.pay;
+    case 'proc':
+      var ps = procStatus(r);
+      return '<div class="procedure-cell"><div class="procedure-left"><span class="procedure-usage mono">미사용 <strong>'+r.unused+'</strong> <span class="slash">/</span> 전체 <strong>'+r.total+'</strong></span></div><button class="btn-manage" data-action="manage" data-order="'+r.order+'">관리</button></div>';
+    case 'comment': return r.comment==='-' ? '<span class="cell-null">-</span>' : r.comment;
+    case 'amount':  return '<span class="mono" style="display:block;text-align:right">'+r.amount.toLocaleString()+'원</span>';
+    case 'memo':
+      var mt = r.memo==='-' ? '<span class="cell-null">-</span>' : r.memo;
+      return '<div class="memo-cell"><span class="memo-text">'+mt+'</span><button class="btn-memo-edit" data-action="memo-edit" data-order="'+r.order+'" title="메모 수정"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="#A4A3AF"/></svg></button></div>';
+    case 'sms': return '<button class="btn-sms-outline" data-action="sms" data-order="'+r.order+'">문자 전송</button>';
+    default:        return '';
+  }
+}
+
+/* ── Pagination ── */
+function renderPagination(){
+  var total = st.filtered.length;
+  var pages = Math.max(1, Math.ceil(total/st.rpp));
+  var cur = st.page;
+
+  var svgL = '<svg width="20" height="20" viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z" fill="'+(cur<=1?'#DADADF':'#494760')+'"/></svg>';
+  var svgR = '<svg width="20" height="20" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z" fill="'+(cur>=pages?'#DADADF':'#494760')+'"/></svg>';
+  var dots = '<span class="page-dots">···</span>';
+
+  var html = '<button class="page-btn arrow" data-page="'+(cur-1)+'"'+(cur<=1?' disabled':'')+'>'+svgL+'</button>';
+
+  if(pages <= 7){
+    for(var p=1;p<=pages;p++){
+      html += '<button class="page-btn'+(p===cur?' active':'')+'" data-page="'+p+'">'+p+'</button>';
+    }
+  } else {
+    if(cur <= 4){
+      for(var p=1;p<=5;p++) html += '<button class="page-btn'+(p===cur?' active':'')+'" data-page="'+p+'">'+p+'</button>';
+      html += dots;
+      html += '<button class="page-btn" data-page="'+pages+'">'+pages+'</button>';
+    } else if(cur >= pages-3){
+      html += '<button class="page-btn" data-page="1">1</button>';
+      html += dots;
+      for(var p=pages-4;p<=pages;p++) html += '<button class="page-btn'+(p===cur?' active':'')+'" data-page="'+p+'">'+p+'</button>';
+    } else {
+      html += '<button class="page-btn" data-page="1">1</button>';
+      html += dots;
+      for(var p=cur-1;p<=cur+1;p++) html += '<button class="page-btn'+(p===cur?' active':'')+'" data-page="'+p+'">'+p+'</button>';
+      html += dots;
+      html += '<button class="page-btn" data-page="'+pages+'">'+pages+'</button>';
+    }
+  }
+
+  html += '<button class="page-btn arrow" data-page="'+(cur+1)+'"'+(cur>=pages?' disabled':'')+'>'+svgR+'</button>';
+  document.querySelector('.pagination').innerHTML = html;
+}
+
+function goPage(p){
+  var pages = Math.ceil(st.filtered.length/st.rpp);
+  if(p<1||p>pages) return;
+  st.page = p;
+  renderTable();
+  renderPagination();
+}
+
+/* ── Toast ── */
+function toast(msg, type){
+  type = type||'info';
+  var icons = {
+    success:'<svg width="18" height="18" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="#5FC982"/></svg>',
+    error:  '<svg width="18" height="18" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="#FA9EA6"/></svg>',
+    info:   '<svg width="18" height="18" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" fill="#C3B8FF"/></svg>',
+  };
+  var el = document.createElement('div');
+  el.className = 'toast '+type;
+  el.innerHTML = (icons[type]||'')+msg;
+  $id('toastContainer').appendChild(el);
+  setTimeout(function(){ el.remove(); }, 2500);
+}
+
+/* ── Dropdown helpers ── */
+var openDD = null;
+function closeAll(){
+  document.querySelectorAll('.dropdown-menu.open,.rows-dropdown.open').forEach(function(m){m.classList.remove('open');});
+  document.querySelectorAll('.select-box.open,.rows-select-box.open').forEach(function(b){b.classList.remove('open');});
+  $id('overlay').classList.remove('active');
+  openDD = null;
+}
+function openDropdown(boxEl, menuEl){
+  var isOpen = menuEl.classList.contains('open');
+  closeAll();
+  if(!isOpen){
+    boxEl.classList.add('open');
+    menuEl.classList.add('open');
+    $id('overlay').classList.add('active');
+    openDD = {box:boxEl, menu:menuEl};
+  }
+}
+
+/* ── Col Edit Panel ── */
+var dragHandleSvg = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="7.5" cy="5.5" r="1.5" fill="#DADADF"/><circle cx="12.5" cy="5.5" r="1.5" fill="#DADADF"/><circle cx="7.5" cy="10" r="1.5" fill="#DADADF"/><circle cx="12.5" cy="10" r="1.5" fill="#DADADF"/><circle cx="7.5" cy="14.5" r="1.5" fill="#DADADF"/><circle cx="12.5" cy="14.5" r="1.5" fill="#DADADF"/></svg>';
+var eyeOnSvg  = '<svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" fill="#70798F"/></svg>';
+var eyeOffSvg = '<svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z" fill="#A4A3AF"/></svg>';
+
+function renderColPanel(){
+  var panel = $id('colEditPanel');
+  panel.innerHTML = '<div class="col-edit-title">열 표시 설정</div>';
+  var dragSrc = null;
+
+  COLS.forEach(function(c){
+    var item = document.createElement('div');
+    item.className = 'col-toggle-item';
+    item.setAttribute('draggable', 'true');
+    item.dataset.colKey = c.key;
+    item.innerHTML =
+      '<div class="drag-handle">'+dragHandleSvg+'</div>'+
+      '<span class="col-item-label">'+c.label+'</span>'+
+      '<button class="btn-eye" data-col="'+c.key+'">'+(st.colVis[c.key] ? eyeOnSvg : eyeOffSvg)+'</button>';
+
+    item.querySelector('.btn-eye').addEventListener('click', function(e){
+      e.stopPropagation();
+      st.colVis[c.key] = !st.colVis[c.key];
+      renderColPanel();
+      renderTable();
+    });
+
+    item.addEventListener('dragstart', function(e){
+      dragSrc = item;
+      e.dataTransfer.effectAllowed = 'move';
+      setTimeout(function(){ item.classList.add('dragging'); }, 0);
+    });
+    item.addEventListener('dragend', function(){
+      item.classList.remove('dragging');
+      panel.querySelectorAll('.col-toggle-item').forEach(function(i){ i.classList.remove('drag-over'); });
+    });
+    item.addEventListener('dragover', function(e){
+      e.preventDefault();
+      if(item !== dragSrc){
+        panel.querySelectorAll('.col-toggle-item').forEach(function(i){ i.classList.remove('drag-over'); });
+        item.classList.add('drag-over');
+      }
+    });
+    item.addEventListener('drop', function(e){
+      e.stopPropagation();
+      if(dragSrc && dragSrc !== item){
+        var srcKey = dragSrc.dataset.colKey, dstKey = item.dataset.colKey;
+        var si=-1, di=-1;
+        for(var i=0;i<COLS.length;i++){
+          if(COLS[i].key===srcKey) si=i;
+          if(COLS[i].key===dstKey) di=i;
+        }
+        if(si!==-1 && di!==-1){
+          var moved = COLS.splice(si,1)[0];
+          COLS.splice(di,0,moved);
+          renderColPanel();
+          renderTable();
+        }
+      }
+    });
+
+    panel.appendChild(item);
+  });
+}
+
+/* ── Init & Bind All Events ── */
+document.addEventListener('DOMContentLoaded', function(){
+  renderColPanel();
+  updateSummaryCards();
+  applyFilters();
+
+  // Overlay closes everything
+  $id('overlay').addEventListener('click', function(){
+    closeAll();
+    $id('btnColEdit').classList.remove('open');
+    $id('colEditPanel').classList.remove('open');
+  });
+
+  // Charge button
+  $id('btnCharge').addEventListener('click', function(){ toast('충전 페이지로 이동합니다.','info'); });
+
+  // Download
+  $id('btnDownload').addEventListener('click', function(){ toast('다운로드가 시작됩니다.','success'); });
+
+  // Query button
+  $id('btnQuery').addEventListener('click', function(){ applyFilters(); });
+
+  // Search live
+  $id('searchInput').addEventListener('input', function(){
+    st.query = this.value;
+    applyFilters();
+  });
+  $id('searchInput').addEventListener('keydown', function(e){
+    if(e.key==='Enter') applyFilters();
+  });
+
+  // Summary Card Filter
+  document.querySelector('.summary-cards').addEventListener('click', function(e){
+    var card = e.target.closest('.summary-card');
+    if(!card) return;
+    var val = card.dataset.card;
+    if(!val) return;
+    document.querySelectorAll('.summary-card').forEach(function(c){ c.classList.remove('summary-card--active'); });
+    card.classList.add('summary-card--active');
+    st.card = val;
+    applyFilters();
+  });
+
+  // Select: 기간
+  $id('sel-period').addEventListener('click', function(){ openDropdown(this, $id('dd-period')); });
+  $id('dd-period').addEventListener('click', function(e){
+    var item = e.target.closest('.dropdown-item');
+    if(!item) return;
+    this.querySelectorAll('.dropdown-item').forEach(function(i){ i.classList.remove('selected'); });
+    item.classList.add('selected');
+    $id('lbl-period').textContent = item.textContent.trim();
+    closeAll();
+  });
+
+  // Select: 유입경로
+  var srcValMap = {'전체':'all','바비톡앱':'app','웹':'web','기타':'other'};
+  var srcLabels = {all:'유입경로',app:'바비톡앱',web:'웹',other:'기타'};
+  $id('sel-source').addEventListener('click', function(){ openDropdown(this, $id('dd-source')); });
+  $id('dd-source').addEventListener('click', function(e){
+    var item = e.target.closest('.dropdown-item');
+    if(!item) return;
+    this.querySelectorAll('.dropdown-item').forEach(function(i){ i.classList.remove('selected'); });
+    item.classList.add('selected');
+    var txt = item.textContent.trim();
+    st.source = item.dataset.value || srcValMap[txt] || 'all';
+    $id('lbl-source').textContent = srcLabels[st.source] || txt;
+    closeAll();
+    applyFilters();
+  });
+
+  // Select: 결제 상태
+  var payValMap = {'전체':'all','결제 완료':'paid','부분환불':'refund-partial','전체환불':'refund-full'};
+  var payLabels = {all:'결제 상태',paid:'결제 완료','refund-partial':'부분환불','refund-full':'전체환불'};
+  $id('sel-paystat').addEventListener('click', function(){ openDropdown(this, $id('dd-paystat')); });
+  $id('dd-paystat').addEventListener('click', function(e){
+    var item = e.target.closest('.dropdown-item');
+    if(!item) return;
+    this.querySelectorAll('.dropdown-item').forEach(function(i){ i.classList.remove('selected'); });
+    item.classList.add('selected');
+    var txt = item.textContent.trim();
+    st.paystat = item.dataset.value || payValMap[txt] || 'all';
+    $id('lbl-paystat').textContent = payLabels[st.paystat] || txt;
+    closeAll();
+    applyFilters();
+  });
+
+  // Rows per page
+  $id('rowsBox').addEventListener('click', function(){
+    var dd = $id('rowsDropdown');
+    var isOpen = dd.classList.contains('open');
+    closeAll();
+    if(!isOpen){
+      this.classList.add('open');
+      dd.classList.add('open');
+      $id('overlay').classList.add('active');
+    }
+  });
+  $id('rowsDropdown').addEventListener('click', function(e){
+    var item = e.target.closest('.dropdown-item');
+    if(!item) return;
+    this.querySelectorAll('.dropdown-item').forEach(function(i){ i.classList.remove('selected'); });
+    item.classList.add('selected');
+    st.rpp = parseInt(item.textContent.trim()) || 20;
+    $id('rowsLabel').textContent = item.textContent.trim();
+    closeAll();
+    st.page = 1;
+    renderTable();
+    renderPagination();
+  });
+
+  // Col Edit Panel
+  $id('btnColEdit').addEventListener('click', function(){
+    var panel = $id('colEditPanel');
+    var isOpen = panel.classList.contains('open');
+    closeAll();
+    if(!isOpen){
+      this.classList.add('open');
+      panel.classList.add('open');
+      $id('overlay').classList.add('active');
+    }
+  });
+
+  // Table body delegation (manage, sms, pagination)
+  $id('tblBody').addEventListener('click', function(e){
+    var btn = e.target.closest('[data-action]');
+    if(btn){
+      e.stopPropagation();
+      if(btn.dataset.action==='manage'||btn.dataset.action==='memo-edit'){
+        var manageRow = DATA.filter(function(d){ return d.order===btn.dataset.order; })[0];
+        if(manageRow) openDrawer(manageRow);
+      }
+      if(btn.dataset.action==='sms'){
+        var smsRow = DATA.filter(function(d){ return d.order===btn.dataset.order; })[0];
+        if(smsRow) openSmsModal(smsRow);
+      }
+      if(btn.dataset.action==='toggle-cs'){
+        var row = DATA.filter(function(d){ return d.order===btn.dataset.order; })[0];
+        if(row){ row.cs = row.cs==='확인'?'신규':'확인'; row.cst = row.cs==='신규'?'primary':'neutral'; renderTable(); }
+      }
+      if(btn.dataset.action==='toggle-visit'){
+        var row = DATA.filter(function(d){ return d.order===btn.dataset.order; })[0];
+        if(row){ row.visit = row.visit==='미내원'?'내원완료':'미내원'; renderTable(); }
+      }
+    }
+  });
+
+  // Pagination delegation
+  $id('paginationEl').addEventListener('click', function(e){
+    var btn = e.target.closest('.page-btn');
+    if(!btn || btn.disabled || btn.hasAttribute('disabled')) return;
+    goPage(parseInt(btn.dataset.page, 10));
+  });
+
+  // Drawer open/close
+  function openDrawer(r) {
+    var used = r.total - r.unused;
+    var pricePerSession = Math.round(r.amount / r.total);
+    var expiry = r.date.replace(/^(\d{2})-(\d{2})-\d{2}.*/, function(_,y,m){ return (parseInt(y)+1)+'-'+m+'-'+r.date.split('-')[2].split(' ')[0]+' '+r.date.split(' ')[1]; });
+
+    var sessions = '';
+    for(var i=1;i<=r.total;i++){
+      var isUsed = i <= used;
+      var badge = isUsed
+        ? '<span class="drawer-session-badge used">사용완료</span>'
+        : '<span class="drawer-session-badge avail">사용가능</span>';
+      var right = isUsed
+        ? '<div class="drawer-session-dates"><div class="drawer-date-item"><span class="drawer-date-label">방문일</span><span class="drawer-date-value">25-04-16</span></div><div class="drawer-date-item"><span class="drawer-date-label">사용완료일</span><span class="drawer-date-value">25-04-16</span></div></div>'
+        : '<button class="btn-use" data-action="drawer-use" data-session="'+i+'">사용하기</button>';
+      sessions += '<div class="drawer-session-row"><div class="drawer-session-left"><div class="drawer-session-top">'+badge+'<span class="drawer-session-num">'+i+'회차</span></div><div class="drawer-session-order">'+r.order+'</div><div class="drawer-session-price">판매금액 '+pricePerSession.toLocaleString()+'원</div></div><div class="drawer-session-right">'+right+'</div></div>';
+    }
+
+    var html =
+      '<div class="drawer-section">' +
+        '<div class="drawer-customer-name">'+r.buyer+' '+r.phone+'</div>' +
+        '<div class="drawer-info-row"><span class="drawer-info-label">결제일</span><span class="drawer-info-value">'+r.date+' (카드결제/수수료율 2.4%)</span></div>' +
+        '<div class="drawer-info-row"><span class="drawer-info-label">주문번호</span><span class="drawer-info-value">'+r.order+'</span></div>' +
+        '<div class="drawer-info-row"><span class="drawer-info-label">고객 코멘트</span><span class="drawer-info-value">'+(r.comment==='-'?'-':r.comment)+'</span></div>' +
+      '</div>' +
+      '<div class="drawer-section">' +
+        '<div class="drawer-tickets-meta"><span class="drawer-tickets-total">총 '+r.total+'회</span><div class="drawer-tickets-expiry"><span class="drawer-expiry-label">사용만료일</span><span class="drawer-expiry-date">'+expiry+'</span></div></div>' +
+        '<div class="drawer-ticket-card js-ticket-card">' +
+          '<div class="drawer-ticket-head js-ticket-head"><div class="drawer-ticket-head-info"><div class="drawer-ticket-name">'+r.event+'</div><div class="drawer-ticket-sub">'+r.total+'회 / 1회 기준가 '+pricePerSession.toLocaleString()+'원</div></div>' +
+          '<span class="drawer-ticket-chevron"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z" fill="#70798F"/></svg></span></div>' +
+          '<div class="drawer-ticket-body">'+sessions+'</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="drawer-section">' +
+        '<div class="drawer-accordion-row js-accordion"><span class="drawer-accordion-title">결제 정보</span><svg width="24" height="24" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z" fill="#A4A3AF"/></svg></div>' +
+        '<div class="drawer-accordion-row js-accordion" style="border-top:1px solid var(--outline-neutral-subtle)"><span class="drawer-accordion-title">정산 대상 정보</span><svg width="24" height="24" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z" fill="#A4A3AF"/></svg></div>' +
+      '</div>' +
+      '<div class="drawer-section">' +
+        '<div class="drawer-memo-header"><span class="drawer-memo-title">CS 메모</span><button class="btn-sms-sm" data-action="drawer-sms">문자전송</button></div>' +
+        '<textarea class="drawer-textarea js-drawer-memo" placeholder="메모를 남겨주세요">'+(r.memo==='-'?'':r.memo)+'</textarea>' +
+        '<button class="btn-save js-drawer-save">저장</button>' +
+      '</div>';
+
+    document.querySelector('.js-drawer-body').innerHTML = html;
+    document.querySelector('.js-drawer').classList.add('open');
+    document.querySelector('.js-drawer-overlay').classList.add('active');
+
+    // ticket accordion
+    var head = document.querySelector('.js-ticket-head');
+    if(head) head.addEventListener('click', function(){
+      this.closest('.js-ticket-card').classList.toggle('collapsed');
+    });
+
+    // save button
+    document.querySelector('.js-drawer-save').addEventListener('click', function(){
+      var memo = document.querySelector('.js-drawer-memo').value;
+      r.memo = memo || '-';
+      renderTable();
+      toast('CS 메모가 저장됐어요.', 'success');
+    });
+
+    // sms button in drawer
+    var smsBtnDrawer = document.querySelector('.btn-sms-sm');
+    if(smsBtnDrawer) smsBtnDrawer.addEventListener('click', function(){
+      openSmsModal(r);
+    });
+
+    // use button
+    document.querySelector('.js-drawer-body').addEventListener('click', function(e){
+      var btn = e.target.closest('.btn-use');
+      if(!btn) return;
+      var sessionIdx = parseInt(btn.getAttribute('data-session'));
+      r.unused = Math.max(0, r.unused - 1);
+      var today = new Date();
+      var dateStr = String(today.getFullYear()).slice(2)+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+      var sessionRow = btn.closest('.drawer-session-row');
+      var badge = sessionRow.querySelector('.drawer-session-badge');
+      if(badge){ badge.className='drawer-session-badge used'; badge.textContent='사용완료'; }
+      var right = btn.closest('.drawer-session-right');
+      if(right) right.innerHTML='<div class="drawer-session-dates"><div class="drawer-date-item"><span class="drawer-date-label">방문일</span><span class="drawer-date-value">'+dateStr+'</span></div><div class="drawer-date-item"><span class="drawer-date-label">사용완료일</span><span class="drawer-date-value">'+dateStr+'</span></div></div>';
+      if(r.unused===0){ r.proc='시술 완료'; r.proct='neutral'; }
+      toast(sessionIdx+'회차 사용처리 됐어요.', 'success');
+    });
+  }
+
+  function closeDrawer(){
+    document.querySelector('.js-drawer').classList.remove('open');
+    document.querySelector('.js-drawer-overlay').classList.remove('active');
+  }
+
+  document.querySelector('.js-drawer-close').addEventListener('click', closeDrawer);
+  document.querySelector('.js-drawer-overlay').addEventListener('click', closeDrawer);
+
+  /* ── SMS Modal ── */
+  function openSmsModal(r){
+    document.querySelector('.js-sms-cname').textContent = r.buyer;
+    document.querySelector('.js-sms-cphone').textContent = r.phone;
+
+    var histEl = document.querySelector('.js-sms-history');
+    var log = r.smsLog || [];
+    if(!log.length){
+      histEl.innerHTML = '<div class="sms-history-empty">전송된 문자 이력이 없어요</div>';
+    } else {
+      histEl.innerHTML = log.map(function(m){
+        return '<div class="sms-msg-item">'
+          +'<div class="sms-msg-bubble">'+m.msg+'</div>'
+          +'<div class="sms-msg-meta">'+m.date+'</div>'
+          +'</div>';
+      }).join('');
+    }
+
+    var ta = document.querySelector('.js-sms-textarea');
+    var countEl = document.querySelector('.js-sms-count');
+    ta.value = '';
+    countEl.textContent = '0 / 80';
+
+    document.querySelector('.sms-modal-bg').classList.add('active');
+
+    // char count
+    ta.oninput = function(){ countEl.textContent = ta.value.length + ' / 80'; };
+
+    // send
+    document.querySelector('.js-sms-send').onclick = function(){
+      var msg = ta.value.trim();
+      if(!msg) return;
+      if(!r.smsLog) r.smsLog = [];
+      var now = new Date();
+      var ds = String(now.getFullYear()).slice(2)+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+      r.smsLog.push({date:ds, msg:msg});
+      var item = document.createElement('div');
+      item.className = 'sms-msg-item';
+      item.innerHTML = '<div class="sms-msg-bubble">'+msg+'</div><div class="sms-msg-meta">'+ds+'</div>';
+      var empty = histEl.querySelector('.sms-history-empty');
+      if(empty) empty.remove();
+      histEl.appendChild(item);
+      histEl.scrollTop = histEl.scrollHeight;
+      ta.value = '';
+      countEl.textContent = '0 / 80';
+      toast(r.buyer+'님께 문자를 전송했어요.', 'success');
+    };
+  }
+
+  function closeSmsModal(){
+    document.querySelector('.sms-modal-bg').classList.remove('active');
+  }
+  document.querySelector('.js-sms-modal-close').addEventListener('click', closeSmsModal);
+  document.querySelector('.js-sms-modal-bg').addEventListener('click', function(e){
+    if(e.target === this) closeSmsModal();
+  });
+});
+})();
+</script>
+
+<!-- SMS Modal -->
+<div class="sms-modal-bg js-sms-modal-bg">
+  <div class="sms-modal">
+    <div class="sms-modal-header">
+      <span class="sms-modal-title">문자 전송</span>
+      <button class="sms-modal-close js-sms-modal-close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="#70798F"/></svg>
+      </button>
+    </div>
+    <div class="sms-modal-customer">
+      <div class="sms-modal-cname js-sms-cname"></div>
+      <div class="sms-modal-cphone js-sms-cphone"></div>
+    </div>
+    <div class="sms-history js-sms-history"></div>
+    <div class="sms-compose">
+      <textarea class="sms-compose-textarea js-sms-textarea" placeholder="문자 내용을 입력하세요" maxlength="80"></textarea>
+      <div class="sms-compose-footer">
+        <span class="sms-char-count js-sms-count">0 / 80</span>
+        <button class="sms-send-btn js-sms-send">전송</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Drawer Overlay -->
+<div class="drawer-overlay js-drawer-overlay"></div>
+
+<!-- Drawer -->
+<div class="drawer js-drawer">
+  <div class="drawer-header">
+    <button class="drawer-close js-drawer-close">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="#70798F"/></svg>
+    </button>
+    <div class="drawer-title">고객 관리</div>
+  </div>
+  <div class="drawer-body js-drawer-body"></div>
+</div>
+</body>
+</html>
